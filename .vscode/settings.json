@@ -1,0 +1,15 @@
+{
+    "redisXplorer.config": {
+        "profiles": [
+            {
+                "name": "account",
+                "host": "192.168.18.234",
+                "accessKey": "",
+                "filter": "*",
+                "port": "6379",
+                "db":2
+            }
+        ],
+        "scanLimit": 200
+    }
+}
