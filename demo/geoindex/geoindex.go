@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"log"
 
@@ -20,7 +21,13 @@ func init() {
 	// http.HandleFunc("/knearest", knearest)
 }
 func main() {
-	if false { //test
+	if true { //test
+		var now time.Time
+		fmt.Printf("%+v\n", now)
+		if now.IsZero() {
+			fmt.Println("now is zero")
+		}
+		return
 		nearest := getIndex().KNearest(index.NewGeoPoint("query", 18.230292850934863, -63.16093794856357), int(1000), index.Km(5), func(_ index.Point) bool { return true })
 		fmt.Println(nearest)
 		return

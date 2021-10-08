@@ -20,6 +20,7 @@ type timestampedCounter struct {
 
 // Expiring counter.
 type expiringCounter struct {
+	// queue的内容可以是timestampedCounter
 	counters   *queue
 	minutes    Minutes
 	count      accumulatingCounter
@@ -131,6 +132,7 @@ func (c *singleValueAccumulatingCounter) Add(point Point) {
 	c.count++
 }
 
+// 没有判空，可能count为负
 func (c *singleValueAccumulatingCounter) Remove(point Point) {
 	c.latSum -= point.Lat()
 	c.lonSum -= point.Lon()

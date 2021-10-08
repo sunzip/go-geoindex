@@ -109,6 +109,8 @@ func distance(p1, p2 Point) Meters {
 	return Meters(dist)
 }
 
+// 1精度的距离（维度抽样整数值）
+// 且，这种方式，似乎不需要make，lonLength = lonDegreeDistance{} 即可
 type lonDegreeDistance map[int]Meters
 
 func (lonDist lonDegreeDistance) get(lat float64) Meters {
@@ -130,6 +132,7 @@ var (
 
 // Calculates approximate distance between two points using euclidian distance. The assumption here
 // is that the points are relatively close to each other.
+// 返回 SquareDistance ，距离的平方
 func approximateSquareDistance(p1, p2 Point) Meters {
 	avgLat := (p1.Lat() + p2.Lat()) / 2.0
 

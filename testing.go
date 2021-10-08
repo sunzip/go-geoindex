@@ -52,6 +52,7 @@ var (
 	points = [...]Point{leicester, coventGarden, totenham, picadilly, charring, embankment, oxford, westminster, regentsPark, londonBridge, brentCross, lewisham}
 )
 
+// 地铁站
 func tubeStations() []Point {
 	file, _ := os.Open("test/tube.csv")
 	defer file.Close()
@@ -71,6 +72,7 @@ func tubeStations() []Point {
 	return points
 }
 
+// 世界首都
 func worldCapitals() []Point {
 	file, err := os.Open("test/capitals.csv")
 
@@ -98,6 +100,7 @@ func worldCapitals() []Point {
 	return capitals
 }
 
+// 没有设置now，每次拿到都是time.Now()
 var now time.Time
 
 func getNow() time.Time {
@@ -108,6 +111,7 @@ func getNow() time.Time {
 	}
 }
 
+// 无人使用
 func toCountPoints(points []Point) []*CountPoint {
 	result := make([]*CountPoint, len(points))
 

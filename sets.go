@@ -9,12 +9,14 @@ type set interface {
 	Add(id string, value interface{})
 	Get(id string) (value interface{}, ok bool)
 	Remove(id string)
+	// 转成array
 	Values() []interface{}
 	Size() int
 	Clone() set
 }
 
 // A set that contains values.
+// alias 别名
 type basicSet map[string]interface{}
 
 func newSet() set {
@@ -60,11 +62,14 @@ func (set basicSet) Size() int {
 
 // An expiring set that removes the points after X minutes.
 type expiringSet struct {
+	// set and queue保持sync
+	// 同时lastInserted又比 insertionOrder新，看 Remove 方法
 	values         set
 	insertionOrder *queue
-	expiration     Minutes
-	onExpire       func(id string, value interface{})
-	lastInserted   map[string]time.Time
+	// 过期时长n分钟
+	expiration   Minutes
+	onExpire     func(id string, value interface{})
+	lastInserted map[string]time.Time
 }
 
 type timestampedValue struct {
@@ -82,11 +87,13 @@ func newExpiringSet(expiration Minutes) *expiringSet {
 	return &expiringSet{newSet(), newQueue(1), expiration, nil, make(map[string]time.Time)}
 }
 
+// 过期时长 n分钟
 func (set *expiringSet) hasExpired(time time.Time) bool {
 	currentTime := getNow()
 	return int(currentTime.Sub(time).Minutes()) > int(set.expiration)
 }
 
+// 单条过期
 func (set *expiringSet) expire() {
 	for !set.insertionOrder.IsEmpty() {
 		lastInserted := set.insertionOrder.Peek().(*timestampedValue)
@@ -115,6 +122,8 @@ func (set *expiringSet) Add(id string, value interface{}) {
 	set.insertionOrder.Push(&timestampedValue{id, value, insertionTime})
 }
 
+// 为什么没有处理 set.insertionOrder ???
+// 哦，insertionOrder 只用到按顺序 expire ，crud 与这个无关
 func (set *expiringSet) Remove(id string) {
 	set.expire()
 	set.values.Remove(id)

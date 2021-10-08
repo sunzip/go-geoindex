@@ -85,9 +85,11 @@ func (geoIndex *geoIndex) Range(topLeft Point, bottomRight Point) []interface{} 
 	topLeftIndex := cellOf(topLeft, geoIndex.resolution)
 	bottomRightIndex := cellOf(bottomRight, geoIndex.resolution)
 
+	//右下的x怎么是最小的呢？
 	return geoIndex.get(bottomRightIndex.x, topLeftIndex.x, topLeftIndex.y, bottomRightIndex.y)
 }
 
+// 获取entry
 func (geoIndex *geoIndex) get(minx int, maxx int, miny int, maxy int) []interface{} {
 	entries := make([]interface{}, 0, 0)
 

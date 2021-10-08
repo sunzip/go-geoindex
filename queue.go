@@ -8,9 +8,10 @@ import (
 type queue struct {
 	elements []interface{}
 	start    int64
-	end      int64
-	size     int
-	cap      int
+	// 不包含 end
+	end  int64
+	size int
+	cap  int
 }
 
 // NewQueue creates new Queue with initial capacity.
@@ -22,6 +23,8 @@ func (queue *queue) resize(size int) {
 	newElements := make([]interface{}, size, size)
 
 	for i := queue.start; i < queue.end; i++ {
+		// why 取余？
+		// 目的是为了不超范围
 		el := queue.elements[i%int64(queue.cap)]
 		newElements[i-queue.start] = el
 	}
@@ -29,6 +32,7 @@ func (queue *queue) resize(size int) {
 	queue.cap = size
 	queue.elements = newElements
 	queue.start = 0
+	// 此size（queue.size）不一定==queue.cap
 	queue.end = int64(queue.size)
 }
 
