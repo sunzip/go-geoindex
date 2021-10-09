@@ -7,18 +7,21 @@ import (
 
 type Minutes int
 
+// 计数器接口
 type counter interface {
 	Add(point Point)
 	Remove(point Point)
 	Point() *CountPoint
 }
 
+// 时间戳计数器
 type timestampedCounter struct {
 	counter   accumulatingCounter
 	timestamp time.Time
 }
 
 // Expiring counter.
+//  过期计数器
 type expiringCounter struct {
 	// queue的内容可以是timestampedCounter
 	counters   *queue
@@ -107,6 +110,7 @@ func (c *expiringCounter) String() string {
 }
 
 // Accumulating counter.
+//  累加计数器 interface
 type accumulatingCounter interface {
 	Add(point Point)
 	Remove(point Point)
@@ -120,12 +124,14 @@ func newSingleValueAccumulatingCounter(point Point) accumulatingCounter {
 	return &singleValueAccumulatingCounter{point.Lat(), point.Lon(), 1}
 }
 
+// 单值累加计数器
 type singleValueAccumulatingCounter struct {
 	latSum float64
 	lonSum float64
 	count  int
 }
 
+// 增加 一个点
 func (c *singleValueAccumulatingCounter) Add(point Point) {
 	c.latSum += point.Lat()
 	c.lonSum += point.Lon()
@@ -147,6 +153,7 @@ func (c *singleValueAccumulatingCounter) Point() *CountPoint {
 	return nil
 }
 
+// 增加 累加计数器
 func (c1 *singleValueAccumulatingCounter) Plus(value accumulatingCounter) {
 	c2 := value.(*singleValueAccumulatingCounter)
 	c1.latSum += c2.latSum
@@ -175,6 +182,7 @@ func newMultiValueCounter(point Point) accumulatingCounter {
 	}
 }
 
+// 多值累加计数器
 type multiValueAccumulatingCounter struct {
 	point  *singleValueAccumulatingCounter
 	values map[string]int
@@ -226,6 +234,7 @@ func newAverageAccumulatingCounter(point Point) accumulatingCounter {
 	}
 }
 
+// 均值累加计数器
 type averageAccumulatingCounter struct {
 	point *singleValueAccumulatingCounter
 	sum   float64

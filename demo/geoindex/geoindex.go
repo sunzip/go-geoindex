@@ -20,8 +20,10 @@ func init() {
 	// http.HandleFunc("/points", points)
 	// http.HandleFunc("/knearest", knearest)
 }
+
+// http://127.0.0.1:8090/static/
 func main() {
-	if true { //test
+	if false { //test
 		var now time.Time
 		fmt.Printf("%+v\n", now)
 		if now.IsZero() {

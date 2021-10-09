@@ -155,8 +155,10 @@ func min(a, b int) int {
 }
 
 // KNearest returns the k nearest points near point within maxDistance that match the accept criteria.
+//  k 每一圈新增超过k，则停止 。 是近似距离，所以会多，最终限制k个精确距离最近的点
 func (points *PointsIndex) KNearest(point Point, k int, maxDistance Meters, accept func(p Point) bool) []Point {
 	nearbyPoints := make([]Point, 0)
+	// 这里给的点，可能找不到！！！，返回空 set
 	pointEntry := points.index.GetEntryAt(point).(set)
 	nearbyPoints = append(nearbyPoints, getPoints([]interface{}{pointEntry}, accept)...)
 
@@ -166,14 +168,17 @@ func (points *PointsIndex) KNearest(point Point, k int, maxDistance Meters, acce
 	// and make sure it searches at least one square away.
 	coarseMaxDistance := math.Max(float64(maxDistance)*2.0, float64(points.index.resolution)*2.0+0.01)
 
+	// 循环可以确保 coarseMaxDistance 范围内所有离散点都遍历到 。 且由近及远
 	for d := 1; float64(d)*float64(points.index.resolution) <= coarseMaxDistance; d++ {
 		oldCount := len(nearbyPoints)
 
+		// 获取正方形4个边线上的点的近邻- nearby
 		nearbyPoints = getPointsAppend(nearbyPoints, points.index.get(idx.x-d, idx.x+d, idx.y+d, idx.y+d), accept)
 		nearbyPoints = getPointsAppend(nearbyPoints, points.index.get(idx.x-d, idx.x+d, idx.y-d, idx.y-d), accept)
 		nearbyPoints = getPointsAppend(nearbyPoints, points.index.get(idx.x-d, idx.x-d, idx.y-d+1, idx.y+d-1), accept)
 		nearbyPoints = getPointsAppend(nearbyPoints, points.index.get(idx.x+d, idx.x+d, idx.y-d+1, idx.y+d-1), accept)
 
+		// 本层边线新增数量
 		totalCount += len(nearbyPoints) - oldCount
 
 		if totalCount > k {
@@ -182,6 +187,7 @@ func (points *PointsIndex) KNearest(point Point, k int, maxDistance Meters, acce
 	}
 
 	sortedPoints := &sortedPoints{nearbyPoints, point}
+	// 按照近似的距离排序
 	sort.Sort(sortedPoints)
 
 	k = min(k, len(sortedPoints.points))

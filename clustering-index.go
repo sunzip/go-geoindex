@@ -11,6 +11,7 @@ var (
 	cityLevel   = Km(1000)
 )
 
+// 这里也有指定的距离。根据经验指定距离
 // NewClusteringIndex creates index that clusters the points at three levels with cell size 0.5, 5 and 500km.
 // Useful for creating maps.
 func NewClusteringIndex() *ClusteringIndex {

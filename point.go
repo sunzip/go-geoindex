@@ -22,6 +22,7 @@ const (
 	North
 )
 
+// 抽象的Point 接口
 type Point interface {
 	Id() string
 	Lat() float64
@@ -29,6 +30,7 @@ type Point interface {
 }
 
 // Point implementation.
+// Point 具体实现
 type GeoPoint struct {
 	Pid  string  `json:"Id"`
 	Plat float64 `json:"Lat"`
@@ -96,6 +98,7 @@ func toRadians(x float64) float64 {
 	return x * math.Pi / 180.0
 }
 
+// 比较精确地距离
 func distance(p1, p2 Point) Meters {
 
 	dLat := toRadians(p2.Lat() - p1.Lat())
@@ -109,13 +112,15 @@ func distance(p1, p2 Point) Meters {
 	return Meters(dist)
 }
 
-// 1精度的距离（维度抽样整数值）
-// 且，这种方式，似乎不需要make，lonLength = lonDegreeDistance{} 即可
+// 1经度的距离（维度抽样整数值）
+//  且， 这种方式，似乎不需要make，lonLength = lonDegreeDistance{} 即可
+//  且， key 是 int(lat * 10)
 type lonDegreeDistance map[int]Meters
 
 func (lonDist lonDegreeDistance) get(lat float64) Meters {
 	latIndex := int(lat * 10)
 	latRounded := float64(latIndex) / 10
+	// 以上是，纬度保留1位小数 （舍）
 
 	if value, ok := lonDist[latIndex]; ok {
 		return value

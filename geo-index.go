@@ -22,6 +22,9 @@ type cell struct {
 	y int
 }
 
+// 分辨率似乎是地面长度
+//  x,y 组成的 cell 只是抽象的不同分辨率层级上的离散点。不是坐标
+//  这个抽象的离散点，就起到聚合作用。 多个坐标 point 可以抽象到一个离散点
 func cellOf(point Point, resolution Meters) cell {
 	x := int((-minLat + point.Lat()) * float64(latDegreeLength) / float64(resolution))
 	y := int((-minLon + point.Lon()) * float64(lonDegreeLength) / float64(resolution))
@@ -31,11 +34,13 @@ func cellOf(point Point, resolution Meters) cell {
 
 type geoIndex struct {
 	resolution Meters
-	index      map[cell]interface{}
-	newEntry   func() interface{}
+	// 一个 cell 一个点。起不到聚合的作用
+	index    map[cell]interface{}
+	newEntry func() interface{}
 }
 
 // Creates new geo index with resolution a function that returns a new entry that is stored in each cell.
+//  分辨率似乎是地面长度 （ 1 pixel 像素map到地面的长度？ ）
 func newGeoIndex(resolution Meters, newEntry func() interface{}) *geoIndex {
 	return &geoIndex{resolution, make(map[cell]interface{}), newEntry}
 }
