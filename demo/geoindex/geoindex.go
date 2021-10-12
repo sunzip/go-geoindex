@@ -36,11 +36,15 @@ func main() {
 	}
 	e := gin.Default()
 	e.Static("/static", "../static/")
+	e.Static("/static-gaode", "../static-gaode/")
 	groupName := ""
 	group := e.Group(groupName)
 	{
 		group.GET("/knearest", knearest4Gin)
 		group.GET("/points", points4Gin)
+
+		group.GET("/knearestShanghai", knearest4GinShanghai)
+		group.GET("/pointsShanghai", points4GinShanghai)
 		e.Run(":8090")
 	}
 }
@@ -138,6 +142,7 @@ func points4Gin(c *gin.Context) {
 	c.JSON(http.StatusOK, visiblePoints)
 }
 
+// 废弃
 func points(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	topLeftLat, _ := strconv.ParseFloat(r.Form["topLeftLat"][0], 64)
@@ -151,6 +156,7 @@ func points(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, string(data))
 }
 
+// 废弃
 func knearest(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	lat, _ := strconv.ParseFloat(r.Form["lat"][0], 64)

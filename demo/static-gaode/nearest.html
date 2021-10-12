@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+        html, body, #map-canvas {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        }
+    </style>
+    <script src="http://codeorigin.jquery.com/jquery-1.10.2.min.js"></script>
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script> -->
+    <!-- <script src="http://google-maps-utility-library-v3.googlecode.com/svn/tags/markerclusterer/1.0/src/markerclusterer_compiled.js"></script> -->
+    <script src="markerclusterer.js"></script>
+    <script src="common.js"></script>
+
+    <script type="text/javascript"
+        src="https://webapi.amap.com/maps?v=1.4.15&key=您申请的key值"></script>
+    <script>
+
+        var EPS = 0.00001;
+
+        var map;
+        var markers = [];
+        var nearest = [];
+        var index = window.location.search.split("=")[1];
+
+        var createMarker = function(point, orange) {
+            if (orange) {
+                zIndex=9999
+                icon = 'https://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png';
+            } else {
+                zIndex=1
+                icon = 'https://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png';
+            }
+            
+            var position = new AMap.LngLat(point.Lon, point.Lat);
+
+            
+            // 点标记显示内容，HTML要素字符串
+            var markerContent = '' +
+                '<div class="custom-content-marker">' +
+                '   <img src="'+
+                icon+'">' +
+                '   <div class="close-btn">'+
+                    point.Id+'</div>' +
+                '</div>';
+            
+            marker = new AMap.Marker({
+                // icon: icon,
+                // 将 html 传给 content
+                content: markerContent,
+                position: position,
+                zIndex: zIndex,
+                offset: new AMap.Pixel(-13, -30)
+            });
+            // var pointLatlng = new google.maps.LatLng(point.Lat, point.Lon);
+            // var marker = new google.maps.Marker({
+            //     position: pointLatlng,
+            //     map: map,
+            //     icon: icon,
+            //     title: point.Id
+            // });
+
+           /*  if (orange) {
+                var style = {
+                    zIndex: 9999,
+                }
+                // marker.setZIndex(9999);
+                marker.setStyle(style);
+            } */
+            marker.setMap(map);
+            return marker;
+        }
+
+        var updateMarkers = function(markersArray, points, orange) {
+            if(markersArray.length>0){
+                map.remove(markersArray);
+            }
+
+            markersArray.length = 0;
+
+            for (var i = 0; i < points.length; i++) {
+                markersArray.push(createMarker(points[i], orange));
+            }
+        }
+
+        var knearest = function(event) {
+            var lat = event.lnglat.getLat()
+            var lon = event.lnglat.getLng()
+
+            var k = 7
+
+            var index = window.location.search.split("=")[1];
+            var url = '/knearestShanghai?lat=' + lat + '&lon=' + lon + '&k=' + k + '&index=' + index;
+
+            $.getJSON(url,
+                function(data) {
+                    console.log(JSON.stringify(data));  
+                    updateMarkers(nearest, data, true);
+                }
+            );
+        }
+
+        init(
+            function(points) {
+                updateMarkers(markers, points, false)
+            },
+            function(map) {
+                // todo: clusterer = new MarkerClusterer(map, [], {maxZoom:14}); 
+                // google.maps.event.addListener(map, 'click', knearest);
+                // map.on('click', showInfoClick); test
+                map.on('click', knearest);
+            }
+        );
+
+        
+    function showInfoClick(e){
+        var text = '您在 [ '+e.lnglat.getLng()+','+e.lnglat.getLat()+' ] 的位置单击了地图！'
+        document.querySelector("#text").innerText = text;
+    }
+    </script>
+</head>
+<body>
+<div id="map-canvas"></div>
+<div class="info">
+    <h4 id="text"></h4>
+    <p>当前中心点：<span id="map-center">121.498586,31.239637</span></p>
+</div>
+</body>
+</html>
