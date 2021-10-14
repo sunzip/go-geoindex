@@ -38,13 +38,13 @@ func getIndexShanghai() *index.ClusteringIndex {
 		id := 1
 
 		for _, capital := range capitals {
-			for i := 0; i < 300; i++ {
+			for i := 0; i < 10; i++ {
 				id++
 
 				geoindexShanghai.Add(index.NewGeoPoint(
 					fmt.Sprintf("%d", id),
-					capital.Lat()+rand.Float64()/6.0*sign(),
-					capital.Lon()+rand.Float64()/6.0*sign(),
+					capital.Lat()+rand.Float64()/30.0*sign(),
+					capital.Lon()+rand.Float64()/30.0*sign(),
 				))
 			}
 		}
@@ -53,17 +53,17 @@ func getIndexShanghai() *index.ClusteringIndex {
 	return geoindexShanghai
 }
 func shanghaiPointsRandom() []index.Point {
-	centerLon := 121.4929
-	centerLat := 31.240366
+	centerLon := 121.2229
+	centerLat := 31.100366
 	capitals := make([]index.Point, 0)
 
 	// ran := rand.Rand
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 30; i++ {
 		id := fmt.Sprint(i)
 		rInt := rand.Intn(1000)
-		lat := centerLat + (float64(rInt) / 1000 * sign())
+		lat := centerLat + (float64(rInt) / 1000 * 0.400 * sign())
 		rInt = rand.Intn(1000)
-		lon := centerLon + (float64(rInt) / 1000 * sign())
+		lon := centerLon + (float64(rInt) / 1000 * 0.400 * sign())
 
 		capital := index.NewGeoPoint(id, lat, lon)
 		capitals = append(capitals, capital)

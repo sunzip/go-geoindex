@@ -7,7 +7,19 @@ var init = function(update, onInit) {
         var tmparr = prmarr[i].split("=");
         params[tmparr[0]] = tmparr[1];
     }
+    var refreshArray=[]
 
+    // 拖动时，会调用多次refresh，卡顿
+    // 需要做下性能优化
+    var refreshCache = function() {
+        //清除之前的请求
+        for ( var i=0;i<refreshArray.length;i++){
+            window.clearTimeout(refreshArray[i])
+        }
+
+        r= window.setTimeout(refresh,100) //0.1 s
+        refreshArray.push(r)
+    }
     var refresh = function() {
         var bounds = map.getBounds();
 
@@ -30,7 +42,7 @@ var init = function(update, onInit) {
         var marker
         marker, map = new AMap.Map("map-canvas", {
             resizeEnable: true,
-            center: [121.4929,31.240366],
+            center: [121.219958,31.096862],
             zoom: 13
         });
         // map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
@@ -38,11 +50,14 @@ var init = function(update, onInit) {
         // todo:
         
         // map.on('movestart', mapMovestart);
-        map.on('mapmove', refresh);
-        // map.on('moveend', mapMoveend);
+        // map.on('mapmove', refresh);
+        map.on('moveend', refreshCache);
 
         if (onInit) {
             onInit(map, params)
+            map.on('complete', function() {
+                refresh();
+            });
         }
     }
 

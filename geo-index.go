@@ -25,6 +25,8 @@ type cell struct {
 // 分辨率似乎是地面长度
 //  x,y 组成的 cell 只是抽象的不同分辨率层级上的离散点。不是坐标
 //  这个抽象的离散点，就起到聚合作用。 多个坐标 point 可以抽象到一个离散点
+//  x 是维度，所以，右边数值小
+//  y 是经度，所以，右边数值小
 func cellOf(point Point, resolution Meters) cell {
 	x := int((-minLat + point.Lat()) * float64(latDegreeLength) / float64(resolution))
 	y := int((-minLon + point.Lon()) * float64(lonDegreeLength) / float64(resolution))
@@ -90,7 +92,7 @@ func (geoIndex *geoIndex) Range(topLeft Point, bottomRight Point) []interface{} 
 	topLeftIndex := cellOf(topLeft, geoIndex.resolution)
 	bottomRightIndex := cellOf(bottomRight, geoIndex.resolution)
 
-	//右下的x怎么是最小的呢？
+	//右下的x怎么是最小的呢？ 因为x 是维度，右边数值小
 	return geoIndex.get(bottomRightIndex.x, topLeftIndex.x, topLeftIndex.y, bottomRightIndex.y)
 }
 

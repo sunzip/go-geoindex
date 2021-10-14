@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/csv"
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -16,12 +15,21 @@ import (
 	index "github.com/hailocab/go-geoindex"
 )
 
+var (
+	dir       = "./static"
+	dirPrefix = "."
+)
+
 func init() {
 	// http.HandleFunc("/points", points)
 	// http.HandleFunc("/knearest", knearest)
+	if exist, _ := PathExists(dir); !exist {
+		dirPrefix = ".."
+	}
 }
 
 // http://127.0.0.1:8090/static/
+// http://127.0.0.1:8090/index
 func main() {
 	if false { //test
 		var now time.Time
@@ -35,8 +43,10 @@ func main() {
 		return
 	}
 	e := gin.Default()
-	e.Static("/static", "../static/")
-	e.Static("/static-gaode", "../static-gaode/")
+	// e.Static("/index.html", dirPrefix+"/index.html") //不行，browser一直跳到 ip:port//
+	e.StaticFile("index", dirPrefix+"/index.html")
+	e.Static("/static", dirPrefix+"/static/")
+	e.Static("/static-gaode", dirPrefix+"/static-gaode/")
 	groupName := ""
 	group := e.Group(groupName)
 	{
@@ -83,7 +93,7 @@ func getIndex() *index.ClusteringIndex {
 }
 
 func worldCapitals() []index.Point {
-	file, err := os.OpenFile("../static/capitals.csv", os.O_RDONLY, 0)
+	file, err := os.OpenFile(dirPrefix+"/static/capitals.csv", os.O_RDONLY, 0)
 
 	if err != nil {
 		log.Printf("%v", err)
@@ -142,28 +152,14 @@ func points4Gin(c *gin.Context) {
 	c.JSON(http.StatusOK, visiblePoints)
 }
 
-// 废弃
-func points(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	topLeftLat, _ := strconv.ParseFloat(r.Form["topLeftLat"][0], 64)
-	topLeftLon, _ := strconv.ParseFloat(r.Form["topLeftLon"][0], 64)
-	bottomRightLat, _ := strconv.ParseFloat(r.Form["bottomRightLat"][0], 64)
-	bottomRightLon, _ := strconv.ParseFloat(r.Form["bottomRightLon"][0], 64)
-
-	visiblePoints := getIndex().Range(index.NewGeoPoint("topLeft", topLeftLat, topLeftLon), index.NewGeoPoint("bottomRight", bottomRightLat, bottomRightLon))
-
-	data, _ := json.Marshal(visiblePoints)
-	fmt.Fprintln(w, string(data))
-}
-
-// 废弃
-func knearest(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	lat, _ := strconv.ParseFloat(r.Form["lat"][0], 64)
-	lon, _ := strconv.ParseFloat(r.Form["lon"][0], 64)
-	k, _ := strconv.ParseInt(r.Form["k"][0], 10, 32)
-
-	nearest := getIndex().KNearest(index.NewGeoPoint("query", lat, lon), int(k), index.Km(5), func(_ index.Point) bool { return true })
-	data, _ := json.Marshal(nearest)
-	fmt.Fprintln(w, string(data))
+// 判断文件夹是否存在
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }

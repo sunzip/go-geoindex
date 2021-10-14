@@ -10,6 +10,26 @@
         padding: 0;
         height: 100%;
         }
+
+        .input-card {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+            background-color: #fff;
+            background-clip: border-box;
+            border-radius: .25rem;
+            width: 22rem;
+            border-width: 0;
+            border-radius: 0.4rem;
+            box-shadow: 0 2px 6px 0 rgb(114 124 245 / 50%);
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+            padding: 0.75rem 1.25rem;
+        }
     </style>
     <script src="http://codeorigin.jquery.com/jquery-1.10.2.min.js"></script>
     <!-- <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script> -->
@@ -87,10 +107,23 @@
                 markersArray.push(createMarker(points[i], orange));
             }
         }
+        var clickArray=[]
 
-        var knearest = function(event) {
+        // 拖动时，会调用多次refresh，卡顿
+        // 需要做下性能优化
+        var clickCache = function(event) {
+            //清除之前的请求
+            for ( var i=0;i<clickArray.length;i++){
+                window.clearTimeout(clickArray[i])
+            }
+
             var lat = event.lnglat.getLat()
             var lon = event.lnglat.getLng()
+            console.log("knearest("+lat+","+lon+")")
+            r= window.setTimeout("knearest("+lat+","+lon+")",200) //0.2 s
+            clickArray.push(r)
+        }
+        var knearest = function(lat,lon) {
 
             var k = 7
 
@@ -99,7 +132,7 @@
 
             $.getJSON(url,
                 function(data) {
-                    console.log(JSON.stringify(data));  
+                    // console.log(JSON.stringify(data));  
                     updateMarkers(nearest, data, true);
                 }
             );
@@ -113,7 +146,14 @@
                 // todo: clusterer = new MarkerClusterer(map, [], {maxZoom:14}); 
                 // google.maps.event.addListener(map, 'click', knearest);
                 // map.on('click', showInfoClick); test
-                map.on('click', knearest);
+                map.on('click', clickCache);
+                map.on('complete', function() {
+                    // alert("地图图块加载完毕！当前地图中心点为：" + map.getCenter())
+                    map.panBy(50, 100);
+                    map.panBy(-50, -100);
+                    // refresh();
+                    // document.getElementById('tip').innerHTML = "地图图块加载完毕！当前地图中心点为：" + map.getCenter();
+                });
             }
         );
 
@@ -122,6 +162,12 @@
         var text = '您在 [ '+e.lnglat.getLng()+','+e.lnglat.getLat()+' ] 的位置单击了地图！'
         document.querySelector("#text").innerText = text;
     }
+    AMap.event.addDomListener(document.getElementById('piexBtn'), 'click', function() {
+        map.panBy(50, 100);
+    });
+    AMap.event.addDomListener(document.getElementById('pantoBtn'), 'click', function() {
+        map.panTo([116.405467, 39.907761]);
+    });
     </script>
 </head>
 <body>
@@ -129,6 +175,14 @@
 <div class="info">
     <h4 id="text"></h4>
     <p>当前中心点：<span id="map-center">121.498586,31.239637</span></p>
+</div>
+<div class="input-card" style="width: auto">
+    <div class="input-item">
+        <input id="piexBtn" type="button" class="btn" value="平移像素值：(50,100)"/>
+    </div>
+    <div class="input-item">
+        <input id="pantoBtn" type="button" class="btn" value="地图中心点平移至：(116.405467,39.907761)"/>
+    </div>
 </div>
 </body>
 </html>
