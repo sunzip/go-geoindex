@@ -12,8 +12,6 @@
         }
     </style>
     <script src="http://codeorigin.jquery.com/jquery-1.10.2.min.js"></script>
-    <!-- <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script> -->
-    <!-- <script src="markerclusterer.js"></script> -->
     <script src="common.js"></script>
     <script type="text/javascript"
         src="https://webapi.amap.com/maps?v=1.4.15&key=您申请的key值&plugin=AMap.MarkerClusterer"></script>
@@ -43,25 +41,10 @@
             return marker;
         }
 
-        /* var cluster = function(markersArray) {
-            clusterer.clearMarkers()
-            clusterer.addMarkers(markersArray)
-        } */
-
         var updateMarkers = function(markersArray, points, orange) {
-            /* for (var i = 0; i < markersArray.length; i++) {
-                markersArray[i].setMap(null);
-            } */
 
             markersArray.length = 0;
             count=0;
-
-            /* if(points.length==1){
-                // 拆分为2个点，位置一样，一个count=count，一个count=0
-                copy=$.extend({}, points[0]);
-                copy.Count=0
-                points.push(copy)
-            } */
 
             for (var i = 0; i < points.length; i++) {
                 point=points[i]
@@ -123,8 +106,6 @@
                 updateMarkers(markers, points, false)
             },
             function(map) {
-                // google
-                // clusterer = new MarkerClusterer(map, [], {maxZoom:14});
 
                 clusterer = new AMap.MarkerClusterer(map, markers, {
                     gridSize: 80,
