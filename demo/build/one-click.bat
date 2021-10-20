@@ -3,7 +3,6 @@
 call build.bat
 call build4linux.bat
 call copy.bat
-set GOOS=windows
 :: 需要安装7z，并且windows
 D:\"Program Files"\7-Zip\7z.exe a ..\map.zip ..\map
 :: 删除文件,如果需要留着测试，则去掉
