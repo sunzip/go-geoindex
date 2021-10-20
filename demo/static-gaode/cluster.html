@@ -13,10 +13,10 @@
     </style>
     <script src="http://codeorigin.jquery.com/jquery-1.10.2.min.js"></script>
     <!-- <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script> -->
-    <script src="markerclusterer.js"></script>
+    <!-- <script src="markerclusterer.js"></script> -->
     <script src="common.js"></script>
     <script type="text/javascript"
-        src="https://webapi.amap.com/maps?v=1.4.15&key=您申请的key值"></script>
+        src="https://webapi.amap.com/maps?v=1.4.15&key=您申请的key值&plugin=AMap.MarkerClusterer"></script>
     <script>
         var EPS = 0.00001;
 
@@ -24,47 +24,112 @@
         var markers = [];
         var clusterer = null;
         var index = window.location.search.split("=")[1];
+        var count=0;//总count
 
         var createMarker = function(point) {
-            var pointLatlng = new google.maps.LatLng(point.Lat, point.Lon);
-            var marker = new google.maps.Marker({
-                position: pointLatlng,
-                title: point.Id
-            });
-
-            if (point.Count) {
-                marker.count = point.Count
-            } else {
-                marker.count = 1
+            pArr=[]
+            pArr.push(point.Lon)
+            pArr.push(point.Lat)
+            if(point.Count==undefined){
+                point.Count=1
             }
+            count+= point.Count
+            marker=new AMap.Marker({
+                position: pArr, //point 需要是 ["lon","lat"]
+                content: '<div style="background-color: hsla(180, 100%, 50%, 0.7); height: 24px; width: 24px; border: 1px solid hsl(180, 100%, 40%); border-radius: 12px; box-shadow: hsl(180, 100%, 50%) 0px 0px 1px;"></div>',
+                offset: new AMap.Pixel(-15, -15),
+                count: point.Count
+            })
             return marker;
         }
 
-        var cluster = function(markersArray) {
+        /* var cluster = function(markersArray) {
             clusterer.clearMarkers()
             clusterer.addMarkers(markersArray)
-        }
+        } */
 
         var updateMarkers = function(markersArray, points, orange) {
-            for (var i = 0; i < markersArray.length; i++) {
+            /* for (var i = 0; i < markersArray.length; i++) {
                 markersArray[i].setMap(null);
-            }
+            } */
 
             markersArray.length = 0;
+            count=0;
+
+            /* if(points.length==1){
+                // 拆分为2个点，位置一样，一个count=count，一个count=0
+                copy=$.extend({}, points[0]);
+                copy.Count=0
+                points.push(copy)
+            } */
 
             for (var i = 0; i < points.length; i++) {
-                markersArray.push(createMarker(points[i], orange));
+                point=points[i]
+                markersArray.push(createMarker(point));
+                {
+                    //特殊处理，1个点时，高德直接显示一个默认样式，不带数字，不能修改。在插件内实现。
+                    // 拆分为2个点，位置一样，一个count=count，一个count=0。可以控制样式。
+                    copy=$.extend({}, point);
+                    copy.Count=0
+                    markersArray.push(createMarker(copy));
+                }
             }
 
-            cluster(markers)
+            // cluster(markers)
+
+            if (clusterer) {
+                clusterer.setMap(null);
+            }
+
+            clusterer = new AMap.MarkerClusterer(map, markersArray, {
+                gridSize: 80,
+                renderClusterMarker: _renderClusterMarker
+            });
         }
+        var _renderClusterMarker = function (context) {
+            count=300; //目前生成300个测试点
+            contextCount=0;
+            for(var i=0;i<context.markers.length;i++){
+                contextCount+=context.markers[i].Ce.count
+            }
+            // 占总数据（非本次数据）的比例显示颜色
+            var factor = Math.pow(contextCount / count, 1 / 18);
+            var div = document.createElement('div');
+            var Hue = 180 - factor * 180;
+            if(contextCount==1){
+                Hue=180;
+            }
+            var bgColor = 'hsla(' + Hue + ',100%,50%,0.7)';
+            var fontColor = 'hsla(' + Hue + ',100%,20%,1)';
+            var borderColor = 'hsla(' + Hue + ',100%,40%,1)';
+            var shadowColor = 'hsla(' + Hue + ',100%,50%,1)';
+            div.style.backgroundColor = bgColor;
+            var size = Math.round(30 + Math.pow(contextCount / count, 1 / 5) * 20);
+            div.style.width = div.style.height = size + 'px';
+            div.style.border = 'solid 1px ' + borderColor;
+            div.style.borderRadius = size / 2 + 'px';
+            div.style.boxShadow = '0 0 1px ' + shadowColor;
+            div.innerHTML = contextCount;
+            div.style.lineHeight = size + 'px';
+            div.style.color = fontColor;
+            div.style.fontSize = '14px';
+            div.style.textAlign = 'center';
+            context.marker.setOffset(new AMap.Pixel(-size / 2, -size / 2));
+            context.marker.setContent(div)
+        };
 
         init(
             function(points) {
                 updateMarkers(markers, points, false)
             },
             function(map) {
-                clusterer = new MarkerClusterer(map, [], {maxZoom:14});
+                // google
+                // clusterer = new MarkerClusterer(map, [], {maxZoom:14});
+
+                clusterer = new AMap.MarkerClusterer(map, markers, {
+                    gridSize: 80,
+                    renderClusterMarker: _renderClusterMarker
+                });
             }
         );
 

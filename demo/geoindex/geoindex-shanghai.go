@@ -27,6 +27,17 @@ func points4GinShanghai(c *gin.Context) {
 	visiblePoints := getIndexShanghai().Range(index.NewGeoPoint("topLeft", rec.TopLeftLat, rec.TopLeftLon),
 		index.NewGeoPoint("bottomRight", rec.BottomRightLat, rec.BottomRightLon))
 
+	if false { //test 显示一个点，看看聚合的样式
+		visiblePoints = []index.Point{}
+		geoPoint := index.GeoPoint{Pid: "id", Plon: 121.2229, Plat: 31.100366}
+		onePoint := index.CountPoint{GeoPoint: &geoPoint, Count: 3}
+		visiblePoints = append(visiblePoints, onePoint)
+
+		/* geoPoint = index.GeoPoint{Pid: "id2", Plon: 121.2229, Plat: 31.100366}
+		twoPoint := index.CountPoint{GeoPoint: &geoPoint, Count: 2}
+		visiblePoints = append(visiblePoints, twoPoint) */
+	}
+
 	c.JSON(http.StatusOK, visiblePoints)
 }
 
