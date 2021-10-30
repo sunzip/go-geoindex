@@ -1,4 +1,4 @@
-var init = function(update, onInit) {
+var init = function(update, onInit,initMap) {
     var prmstr = window.location.search.substr(1)
     var prmarr = prmstr.split("&");
     var params = {};
@@ -26,7 +26,8 @@ var init = function(update, onInit) {
         var ne = bounds.northeast;
         var sw = bounds.southwest;
 
-        var url = '/pointsShanghai?topLeftLat=' + ne.lat + '&topLeftLon=' + sw.lng + '&bottomRightLat=' + sw.lat + '&bottomRightLon=' + ne.lng + '&index=' + params["index"];
+        var url = '/pointsShanghai?topLeftLat=' + ne.lat + '&topLeftLon=' + sw.lng + '&bottomRightLat=' + sw.lat + '&bottomRightLon=' + ne.lng 
+        + '&index=' + params["index"]+ '&pointsCount=' + params["pointsCount"];
 
         console.log(url);
 
@@ -40,12 +41,16 @@ var init = function(update, onInit) {
     function initialize() {
 
         var marker
-        marker, map = new AMap.Map("map-canvas", {
-            resizeEnable: true,
-            center: [121.219958,31.096862],
-            zoom: 13
-        });
-        // map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+        if (initMap==undefined){
+            marker, map = new AMap.Map("map-canvas", {
+                resizeEnable: true,
+                center: [121.219958,31.096862],
+                zoom: 13
+            });
+        }else{
+            map=initMap()
+        }
+            // map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
         // google.maps.event.addListener(map, 'idle', refresh);
         // todo:
         

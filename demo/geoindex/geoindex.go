@@ -140,6 +140,8 @@ type Rectangle struct {
 	TopLeftLon     float64 `form:"topLeftLon"`
 	BottomRightLat float64 `form:"bottomRightLat"`
 	BottomRightLon float64 `form:"bottomRightLon"`
+	PointsCount    int     `form:"pointsCount"`
+	Index          string  `form:"index"`
 }
 
 func points4Gin(c *gin.Context) {

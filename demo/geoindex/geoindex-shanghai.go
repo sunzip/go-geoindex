@@ -9,13 +9,14 @@ import (
 	index "github.com/hailocab/go-geoindex"
 )
 
-var geoindexShanghai *index.ClusteringIndex
+// var geoindexShanghai *index.ClusteringIndex
+var geoindexShanghaiMap = make(map[int]*index.ClusteringIndex)
 
 func knearest4GinShanghai(c *gin.Context) {
 	p := Point{}
 	c.ShouldBind(&p)
 
-	nearest := getIndexShanghai().KNearest(index.NewGeoPoint("query", p.Lat, p.Lon), int(p.K), index.Km(5), func(_ index.Point) bool { return true })
+	nearest := getIndexShanghai(0).KNearest(index.NewGeoPoint("query", p.Lat, p.Lon), int(p.K), index.Km(5), func(_ index.Point) bool { return true })
 	// data, _ := json.Marshal(nearest)
 	c.JSON(http.StatusOK, nearest)
 }
@@ -24,7 +25,7 @@ func points4GinShanghai(c *gin.Context) {
 	rec := Rectangle{}
 	c.BindQuery(&rec)
 
-	visiblePoints := getIndexShanghai().Range(index.NewGeoPoint("topLeft", rec.TopLeftLat, rec.TopLeftLon),
+	visiblePoints := getIndexShanghai(rec.PointsCount).Range(index.NewGeoPoint("topLeft", rec.TopLeftLat, rec.TopLeftLon),
 		index.NewGeoPoint("bottomRight", rec.BottomRightLat, rec.BottomRightLon))
 
 	if false { //test 显示一个点，看看聚合的样式
@@ -41,11 +42,12 @@ func points4GinShanghai(c *gin.Context) {
 	c.JSON(http.StatusOK, visiblePoints)
 }
 
-func getIndexShanghai() *index.ClusteringIndex {
-	if geoindexShanghai == nil {
-		geoindexShanghai = index.NewClusteringIndex()
+func getIndexShanghai(pointsCount int) *index.ClusteringIndex {
+	if v, ok := geoindexShanghaiMap[pointsCount]; !ok {
+		geoindexShanghai := index.NewClusteringIndex()
+		geoindexShanghaiMap[pointsCount] = geoindexShanghai
 
-		capitals := shanghaiPointsRandom()
+		capitals := shanghaiPointsRandom(pointsCount)
 		id := 1
 
 		for _, capital := range capitals {
@@ -59,24 +61,31 @@ func getIndexShanghai() *index.ClusteringIndex {
 				))
 			}
 		}
+		return geoindexShanghai
+	} else {
+		return v
 	}
-
-	return geoindexShanghai
 }
-func shanghaiPointsRandom() []index.Point {
+func shanghaiPointsRandom(pointsCount int) []index.Point {
 	centerLon := 121.2229
 	centerLat := 31.100366
 	capitals := make([]index.Point, 0)
 
+	var count = 30
+	if pointsCount != 0 {
+		count = pointsCount
+	}
 	// ran := rand.Rand
-	for i := 0; i < 30; i++ {
+	for i := 0; i < count; i++ {
 		id := fmt.Sprint(i)
 		rInt := rand.Intn(1000)
 		lat := centerLat + (float64(rInt) / 1000 * 0.400 * sign())
 		rInt = rand.Intn(1000)
 		lon := centerLon + (float64(rInt) / 1000 * 0.400 * sign())
 
-		capital := index.NewGeoPoint(id, lat, lon)
+		count := rand.Intn(10)
+		capital := index.CountPoint{index.NewGeoPoint(id, lat, lon), count * 10}
+		// capital := index.NewGeoPoint(id, lat, lon)
 		capitals = append(capitals, capital)
 	}
 
