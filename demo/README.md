@@ -37,6 +37,8 @@ README.md
 
     中心点大概在上海，随机生成的300个点
 
+    web页面，支持windows和ubuntu linux
+
 # google 
 需要科学上网
 1. K-Nearest (click on a map to show the k-nearest points)
