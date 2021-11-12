@@ -4,6 +4,10 @@
 2. 参考 CHFS 
     通过http ，实现局域网文件共享
     跨平台
+    现在没有的功能：
+    1. page 移动目录 （可以作为一个自己的文件管理平台）
+    2. server 多ip，可以设置主ip
+    3. 配置是放到Appdata目录下的 C:\Users\Administrator\AppData\Local\chfsgui
 
 3. 分屏痛点
     每5分钟记录当前应用的分屏情况，下次开机，按当前分屏情况执行。
