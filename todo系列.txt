@@ -33,7 +33,11 @@
 	太多,找一个通用的中间结构做中转,go model,有类型
 	x... -> go model -> y...
 	
-7. go model 复制,深拷贝,已经有name的库,最好做一个完备的tag库	
+7. go model 复制,深拷贝,已经有name的库,最好做一个完备的tag库
+
+8. {ffmpeg获取视频第一帧, 并保存; 反射加入 slice 元素,反射转换 slice 为interface{} slice[因为旧版没有泛型]	
+	;反射打印任意对象的值,而非地址;
+	}可以发, 代理转发,自己玩
 
 
 假期可以优先做1 and 5
